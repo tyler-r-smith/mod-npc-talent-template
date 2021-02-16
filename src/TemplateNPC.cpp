@@ -700,7 +700,13 @@ public:
                     }
                 }
             }
+            const PlayerTalentMap m_talents = player->m_talents;
+            for (PlayerTalentMap::iterator iter = m_talents.begin(); iter != m_talents.end(); )
+            {
+                PlayerTalentMap::iterator itr = iter++;
+                sLog->outString(">>TEMPLATE NPC: Player has talent: %u.", itr->second->talentID);
 
+            }
             // Don't let players to use Template feature after spending some talent points
             if (player->GetFreeTalentPoints() < 71)
             {
