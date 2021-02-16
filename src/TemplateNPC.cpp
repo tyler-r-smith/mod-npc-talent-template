@@ -700,49 +700,7 @@ public:
                     }
                 }
             }
-            SQLTransaction trans = CharacterDatabase.BeginTransaction();
-            PreparedStatement* stmt = nullptr;
-            PlayerTalentMap* m_talents = player->GetTalentMap();
-            for (PlayerTalentMap::iterator itr = m_talents.begin(); itr != m_talents.end();)
-            {
-                // xinef: skip temporary spells
-                if (itr->second->State == PLAYERSPELL_TEMPORARY)
-                {
-                    ++itr;
-                    continue;
-                }
 
-                // xinef: delete statement for removed / updated talent
-                if (itr->second->State == PLAYERSPELL_REMOVED || itr->second->State == PLAYERSPELL_CHANGED)
-                {
-                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_TALENT_BY_SPELL);
-                    stmt->setUInt32(0, GetGUIDLow());
-                    stmt->setUInt32(1, itr->first);
-                    trans->Append(stmt);
-                }
-
-                // xinef: insert statement for new / updated spell
-                if (itr->second->State == PLAYERSPELL_NEW || itr->second->State == PLAYERSPELL_CHANGED)
-                {
-                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_TALENT);
-                    stmt->setUInt32(0, GetGUIDLow());
-                    stmt->setUInt32(1, itr->first);
-                    stmt->setUInt8(2, itr->second->specMask);
-                    trans->Append(stmt);
-                }
-
-                if (itr->second->State == PLAYERSPELL_REMOVED)
-                {
-                    delete itr->second;
-                    m_talents.erase(itr++);
-                }
-                else
-                {
-                    itr->second->State = PLAYERSPELL_UNCHANGED;
-                    ++itr;
-                }
-            }
-            CharacterDatabase.CommitTransaction(trans);
             // Don't let players to use Template feature after spending some talent points
             if (player->GetFreeTalentPoints() < 71)
             {
